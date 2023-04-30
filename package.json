@@ -1,0 +1,30 @@
+{
+  "name": "js-to-sass-vars-and-custom-props",
+  "version": "1.0.0",
+  "description": "Transform JavaScript object to Sass variables and/or CSS custom properties",
+  "main": "index.js",
+  "type": "module",
+  "module": "index.js",
+  "scripts": {
+    "tokens": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/megalofauna/js-to-sass-vars-and-custom-props.git"
+  },
+  "keywords": [
+    "variables",
+    "custom properties",
+    "Sass",
+    "CSS"
+  ],
+  "author": "Chris Salmon <christopher.salmon@outlook.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/megalofauna/js-to-sass-vars-and-custom-props/issues"
+  },
+  "homepage": "https://github.com/megalofauna/js-to-sass-vars-and-custom-props#readme",
+  "dependencies": {},
+  "devDependencies": {}
+}
