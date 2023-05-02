@@ -1,39 +1,50 @@
 import { writeFile } from 'fs/promises';
 import { tokens } from './src/tokens.js';
 
-const generateSassVariables = (source) => {
-  let sassString = `\n\n // Sass variables \n\n`;
+const iterateTokenObject = (source, scope) => {
+  let result = '';
   for (const [key, value] of Object.entries(source)) {
-    sassString += `$${key}: ${value};\n`;
+    switch (scope) {
+      case 'css':
+        result += `  --${key}: ${value};\n`;
+        break;
+      case 'scss':
+        result += `$${key}: ${value};\n`;
+        break;
+    }
   }
+  return result;
+};
+
+const generateSassVariables = (source, scope) => {
+  let sassString = `\n\n // Sass variables \n\n`;
+  sassString += `${iterateTokenObject(source, scope)}`;
 
   return sassString;
 };
 
-const generateCssCustomProperties = (source, encapsulation) => {
+const generateCssCustomProperties = (source, scope, encapsulation) => {
   let cssString = `// CSS custom properties \n\n`;
   cssString += `${encapsulation} {\n`;
-  for (const [key, value] of Object.entries(source)) {
-    cssString += `  --${key}: ${value};\n`;
-  }
+  cssString += `${iterateTokenObject(source, scope)}`;
   cssString += `}`;
 
   return cssString;
 };
 
 const generateAll = (source, encapsulation) => {
-  let cssString = generateCssCustomProperties(source, encapsulation);
-  let sassString = generateSassVariables(source);
+  let cssString = generateCssCustomProperties(source, 'css', encapsulation);
+  let sassString = generateSassVariables(source, 'scss');
 
   return `${cssString} ${sassString
     .replace(/([a-z])([A-Z])/g, '$1-$2')
     .toLowerCase()}`;
 };
 
-const saveTokensToFile = async (
-  fileName = 'tokens.scss',
-  scope = 'all',
-  encapsulation = ':host'
+const processTokens = async (
+  scope,
+  encapsulation = ':host',
+  fileName = 'tokens.scss'
 ) => {
   const outputPath = './output/' + fileName;
   let contentResult = '';
@@ -41,14 +52,11 @@ const saveTokensToFile = async (
   const source = tokens;
 
   switch (scope) {
-    case 'all':
-      contentResult = generateAll(source, encapsulation);
-      break;
     case 'css':
-      contentResult = generateCssCustomProperties(source, encapsulation);
+      contentResult = generateCssCustomProperties(source, 'css', encapsulation);
       break;
     case 'scss':
-      contentResult = generateSassVariables(source);
+      contentResult = generateSassVariables(source, 'scss');
       break;
     default:
       contentResult = generateAll(source, encapsulation);
@@ -63,4 +71,4 @@ const saveTokensToFile = async (
 };
 
 const args = process.argv.slice(2);
-saveTokensToFile(...args);
+processTokens(...args);
