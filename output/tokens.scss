@@ -1,15 +1,15 @@
-// CSS custom properties 
-
 :host {
-  --primaryColor: #4a86e8;
-  --secondaryColor: #6aa84f;
-  --textColor: #434343;
-  --backgroundColor: #ffffff;
-} 
+  --colors-primaryColor-background: #4a86e8;
+  --colors-primaryColor-text-bitIsNestedMore: 1;
+  --colors-primaryColor-text-andHasASibling: true;
+  --colors-secondaryColor: #6aa84f;
+  --colors-textColor: #434343;
+  --colors-backgroundColor: #ffffff;
+}
 
- // sass variables 
-
-$primary-color: #4a86e8;
-$secondary-color: #6aa84f;
-$text-color: #434343;
-$background-color: #ffffff;
+$colors-primaryColor-background: #4a86e8;
+$colors-primaryColor-text-bitIsNestedMore: 1;
+$colors-primaryColor-text-andHasASibling: true;
+$colors-secondaryColor: #6aa84f;
+$colors-textColor: #434343;
+$colors-backgroundColor: #ffffff;

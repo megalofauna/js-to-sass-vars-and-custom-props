@@ -1,69 +1,56 @@
 import { writeFile } from 'fs/promises';
 import { tokens } from './src/tokens.js';
 
-const iterateTokenObject = (source, scope) => {
-  let result = '';
-  for (const [key, value] of Object.entries(source)) {
-    switch (scope) {
-      case 'css':
-        result += `  --${key}: ${value};\n`;
-        break;
-      case 'scss':
-        result += `$${key}: ${value};\n`;
-        break;
+function processTokenObject(tokenObject, scope, inputString = '', prefix = '') {
+  for (const [key, value] of Object.entries(tokenObject)) {
+    const newPrefix = prefix ? `${prefix}-${key}` : key;
+
+    if (typeof value === 'object' && value !== null) {
+      inputString = processTokenObject(value, scope, inputString, newPrefix);
+    } else {
+      switch (scope) {
+        case 'css':
+          inputString += `  --${newPrefix}: ${value};\n`;
+          break;
+
+        case 'scss':
+          inputString += `$${newPrefix}: ${value};\n`;
+          break;
+      }
     }
   }
-  return result;
-};
+  return inputString;
+}
 
-const generateSassVariables = (source, scope) => {
-  let sassString = `\n\n // Sass variables \n\n`;
-  sassString += `${iterateTokenObject(source, scope)}`;
-
-  return sassString;
-};
-
-const generateCssCustomProperties = (source, scope, encapsulation) => {
-  let cssString = `// CSS custom properties \n\n`;
-  cssString += `${encapsulation} {\n`;
-  cssString += `${iterateTokenObject(source, scope)}`;
-  cssString += `}`;
-
-  return cssString;
-};
-
-const generateAll = (source, encapsulation) => {
-  let cssString = generateCssCustomProperties(source, 'css', encapsulation);
-  let sassString = generateSassVariables(source, 'scss');
-
-  return `${cssString} ${sassString
-    .replace(/([a-z])([A-Z])/g, '$1-$2')
-    .toLowerCase()}`;
+const wrapCssOutput = (outputString, encapsulation) => {
+  return `:${encapsulation} {\n${outputString}}\n\n`;
 };
 
 const processTokens = async (
   scope,
-  encapsulation = ':host',
+  encapsulation = 'host',
   fileName = 'tokens.scss'
 ) => {
   const outputPath = './output/' + fileName;
-  let contentResult = '';
-
   const source = tokens;
+  let outputString = '';
 
   switch (scope) {
     case 'css':
-      contentResult = generateCssCustomProperties(source, 'css', encapsulation);
+      outputString = processTokenObject(source, 'css');
+      outputString = wrapCssOutput(outputString, encapsulation);
       break;
     case 'scss':
-      contentResult = generateSassVariables(source, 'scss');
+      outputString += processTokenObject(source, 'scss');
       break;
     default:
-      contentResult = generateAll(source, encapsulation);
+      outputString = processTokenObject(source, 'css');
+      outputString = wrapCssOutput(outputString, encapsulation);
+      outputString += processTokenObject(source, 'scss');
   }
 
   try {
-    await writeFile(outputPath, contentResult, 'utf8');
+    await writeFile(outputPath, outputString, 'utf8');
     console.log('Token file saved successfully:', outputPath);
   } catch (err) {
     console.error('An error occurred while saving the token file:', err);
